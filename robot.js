@@ -4,9 +4,9 @@
     if (!canvas) return;
 
     /* ---------- Scene / Camera / Renderer ---------- */
-    const scene   = new THREE.Scene();
+    const scene = new THREE.Scene();
     const W = window.innerWidth, H = window.innerHeight;
-    const camera  = new THREE.PerspectiveCamera(40, W / H, 0.1, 200);
+    const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 200);
     camera.position.set(0, 1.5, 14);
     camera.lookAt(0, 1.5, 0);
 
@@ -112,7 +112,7 @@
         root.add(m);
         // arm gloss cap
         const capG = new THREE.SphereGeometry(0.48, 24, 16);
-        const cap  = new THREE.Mesh(capG, glossBlack);
+        const cap = new THREE.Mesh(capG, glossBlack);
         cap.position.set(side * 2.55, -2.25, 0);
         root.add(cap);
     };
@@ -157,14 +157,14 @@
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 // Skip corners to make it look rounded
-                if ((r === 0 || r === rows-1) && (c === 0 || c === cols-1)) continue;
-                if ((r === 0 || r === rows-1) && (c === 1 || c === cols-2)) continue;
+                if ((r === 0 || r === rows - 1) && (c === 0 || c === cols - 1)) continue;
+                if ((r === 0 || r === rows - 1) && (c === 1 || c === cols - 2)) continue;
 
-                const bright = (r >= 1 && r <= rows-2 && c >= 1 && c <= cols-2);
+                const bright = (r >= 1 && r <= rows - 2 && c >= 1 && c <= cols - 2);
                 const dot = new THREE.Mesh(dGeo, bright ? eyeDotMat : eyeDotDimMat);
                 dot.position.set(
-                    (c - (cols-1) / 2) * spacing,
-                    (r - (rows-1) / 2) * spacing,
+                    (c - (cols - 1) / 2) * spacing,
+                    (r - (rows - 1) / 2) * spacing,
                     sockD / 2 + 0.01
                 );
                 panelGroup.add(dot);
@@ -178,8 +178,8 @@
         return panelGroup;
     };
 
-    const eyeL = buildEyePanel(-0.5,  1);
-    const eyeR = buildEyePanel( 0.5, -1);
+    const eyeL = buildEyePanel(-0.5, 1);
+    const eyeR = buildEyePanel(0.5, -1);
     const eyePanels = [eyeL, eyeR];
 
     /* ---------- Lights ---------- */
@@ -206,14 +206,24 @@
     bounceLight.position.set(0, -5, 3);
     scene.add(bounceLight);
 
-    /* ---------- Mouse tracking ---------- */
+    /* ---------- Input tracking (Mouse + Touch) ---------- */
     let mx = 0, my = 0, tx = 0, ty = 0;
 
-    window.addEventListener('mousemove', e => {
-        mx = (e.clientX / window.innerWidth)  * 2 - 1;
-        my = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
+    const handleInput = (clientX, clientY) => {
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        mx = (clientX / W) * 2 - 1;
+        my = -(clientY / H) * 2 + 1;
+    };
 
+    window.addEventListener('mousemove', e => handleInput(e.clientX, e.clientY));
+    
+    // Support for mobile and tablet touch
+    window.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) {
+            handleInput(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
     /* ---------- Resize ---------- */
     window.addEventListener('resize', () => {
         const W = window.innerWidth, H = window.innerHeight;
